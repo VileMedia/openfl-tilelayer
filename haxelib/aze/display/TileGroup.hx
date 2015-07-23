@@ -15,7 +15,7 @@ import flash.display.Sprite;
 class TileGroup extends TileBase
 {
 	public var children:Array<TileBase>;
-	#if flash
+	#if (flash || notiles)
 	var container:Sprite;
 	#end
 
@@ -23,7 +23,7 @@ class TileGroup extends TileBase
 	{
 		super(layer);
 		children = new Array<TileBase>();
-		#if flash
+		#if (flash || notiles)
 		container = new Sprite();
 		#end
 	}
@@ -34,7 +34,7 @@ class TileGroup extends TileBase
 		if (children != null) initChildren();
 	}
 
-	#if flash
+	#if (flash || notiles)
 	override public function getView():DisplayObject { return container; }
 	#end
 
@@ -59,7 +59,7 @@ class TileGroup extends TileBase
 	public function addChild(item:TileBase):Int
 	{
 		removeChild(item);
-		#if flash
+		#if (flash || notiles)
 		container.addChild(item.getView());
 		#end
 		initChild(item);
@@ -69,7 +69,7 @@ class TileGroup extends TileBase
 	public function addChildAt(item:TileBase, index:Int):Int
 	{
 		removeChild(item);
-		#if flash
+		#if (flash || notiles)
 		container.addChildAt(item.getView(), index);
 		#end
 		initChild(item);
@@ -87,7 +87,7 @@ class TileGroup extends TileBase
 		var index = indexOf(item);
 		if (index >= 0) 
 		{
-			#if flash
+			#if (flash || notiles)
 			container.removeChild(item.getView());
 			#end
 			children.splice(index, 1);
@@ -98,7 +98,7 @@ class TileGroup extends TileBase
 
 	public function removeChildAt(index:Int):TileBase
 	{
-		#if flash
+		#if (flash || notiles)
 		container.removeChildAt(index);
 		#end
 		var child = children.splice(index, 1)[0];
@@ -108,7 +108,7 @@ class TileGroup extends TileBase
 
 	public function removeAllChildren():Array<TileBase>
 	{
-		#if flash
+		#if (flash || notiles)
 		while (container.numChildren > 0) container.removeChildAt(0);
 		#end
 		for (child in children)
@@ -126,7 +126,7 @@ class TileGroup extends TileBase
 		var oldIndex = indexOf(item);
 		if (oldIndex >= 0 && index != oldIndex) 
 		{
-			#if flash
+			#if (flash || notiles)
 			container.setChildIndex(item.getView(), index);
 			#end
 			children.splice(oldIndex, 1);

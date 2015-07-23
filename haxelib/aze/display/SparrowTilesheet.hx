@@ -3,7 +3,7 @@ package aze.display;
 import flash.display.BitmapData;
 import flash.geom.Point;
 import flash.geom.Rectangle;
-import flash.Lib;
+import haxe.xml.Fast;
 
 /**
 parrow spritesheet parser for TileLayer
@@ -14,13 +14,13 @@ parrow spritesheet parser for TileLayer
  */
 class SparrowTilesheet extends TilesheetEx
 {
-
-	public function new(img:BitmapData, xml:String, textureScale:Float = 1.0) 
+	public function new(img:BitmapData, def:Dynamic, textureScale:Float = 1.0) 
 	{
 		super(img, textureScale);
 		
-		var ins = new Point(0,0);
-		var x = new haxe.xml.Fast( Xml.parse(xml).firstElement() );
+		var ins = new Point(0, 0);
+		var xml = Std.is(def, Xml) ? def : Xml.parse(def);
+		var x = new haxe.xml.Fast(xml.firstElement());
 
 		for (texture in x.nodes.SubTexture)
 		{
@@ -36,9 +36,7 @@ class SparrowTilesheet extends TilesheetEx
 				else 
 					new Rectangle(0, 0, rect.width, rect.height);
 			
-			//trace([name, rect.x, rect.y, rect.width, rect.height, size.x, size.y, size.width, size.height]);
-			
-			#if flash
+			#if (flash || notiles)
 			var bmp = new BitmapData(cast size.width, cast size.height, true, 0);
 			ins.x = -size.left;
 			ins.y = -size.top;

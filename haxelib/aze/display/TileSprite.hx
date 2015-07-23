@@ -1,9 +1,9 @@
 package aze.display;
 
 import aze.display.TileLayer;
-import flash.geom.Matrix;
 import flash.display.Bitmap;
 import flash.display.DisplayObject;
+import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
 
@@ -24,7 +24,7 @@ class TileSprite extends TileBase
 	var _mirror:Int;
 	var _offset:Point;
 
-	#if !flash
+	#if !(flash || notiles)
 	var _transform:Array<Float>;
 	#else
 	var _matrix:Matrix;
@@ -43,7 +43,7 @@ class TileSprite extends TileBase
 		alpha = _scaleX = _scaleY = 1;
 		_mirror = 0;
 		_indice = -1;
-		#if flash
+		#if (flash || notiles)
 		bmp = new Bitmap();
 		_matrix = new Matrix();
 		#else
@@ -61,7 +61,7 @@ class TileSprite extends TileBase
 		size = layer.tilesheet.getSize(indice);
 	}
 
-	#if flash
+	#if (flash || notiles)
 	override public function getView():DisplayObject { return bmp; }
 	#end
 
@@ -83,7 +83,7 @@ class TileSprite extends TileBase
 		if (_indice != value)
 		{
 			_indice = value;
-			#if flash
+			#if (flash || notiles)
 			bmp.bitmapData = layer.tilesheet.getBitmap(value);
 			bmp.smoothing = layer.useSmoothing;
 			#end
@@ -162,7 +162,7 @@ class TileSprite extends TileBase
 		return value;
 	}
 
-	#if !flash
+	#if !(flash || notiles)
 	public var transform(get_transform, null):Array<Float>;
 	function get_transform():Array<Float>
 	{
@@ -202,6 +202,7 @@ class TileSprite extends TileBase
 			var tileHeight = height / 2;
 			var m = _matrix;
 			m.identity();
+			if (offset != null) m.translate(-offset.x, -offset.y);
 			if (layer.useTransforms) {
 				m.scale(scaleX * layer.tilesheet.scale, scaleY * layer.tilesheet.scale);
 				if (mirror != 0) {

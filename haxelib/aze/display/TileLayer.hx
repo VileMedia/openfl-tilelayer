@@ -1,15 +1,12 @@
 package aze.display;
 
-import flash.geom.Point;
-import flash.display.Bitmap;
-import flash.display.BitmapData;
 import flash.display.BlendMode;
 import flash.display.DisplayObject;
 import flash.display.Graphics;
 import flash.display.Sprite;
-import flash.geom.Matrix;
-import flash.geom.Rectangle;
+import flash.geom.Point;
 import flash.Lib;
+import openfl.geom.ColorTransform;
 
 /**
  * A little wrapper of NME's Tilesheet rendering (for native platform)
@@ -19,6 +16,8 @@ import flash.Lib;
  */
 class TileLayer extends TileGroup
 {
+	static var ZERO = new Point();
+	
 	static var synchronizedElapsed:Float;
 
 	public var view:Sprite;
@@ -53,7 +52,7 @@ class TileLayer extends TileGroup
 		drawList.begin(elapsed == null ? 0 : elapsed, useTransforms, useAlpha, useTint, useAdditive);
 		renderGroup(this, 0, 0, 0);
 		drawList.end();
-		#if flash
+		#if (flash || notiles)
 		view.addChild(container);
 		#else
 		view.graphics.clear();
@@ -71,7 +70,7 @@ class TileLayer extends TileGroup
 		var offsetAlpha = drawList.offsetAlpha;
 		var elapsed = drawList.elapsed;
 
-		#if flash
+		#if (flash || notiles)
 		group.container.x = gx + group.x;
 		group.container.y = gy + group.y;
 		var blend = useAdditive ? BlendMode.ADD : BlendMode.NORMAL;
@@ -86,15 +85,11 @@ class TileLayer extends TileGroup
 			var child = group.children[i];
 			if (child.animated) child.step(elapsed);
 
-			#if !flash
+			#if !(flash || notiles)
 			if (!child.visible) continue;
 			#end
 			
-			#if (flash||js)
 			var group:TileGroup = Std.is(child, TileGroup) ? cast child : null;
-			#else
-			var group:TileGroup = cast child;
-			#end
 
 			if (group != null) 
 			{
@@ -104,7 +99,7 @@ class TileLayer extends TileGroup
 			{
 				var sprite:TileSprite = cast child;
 
-				#if flash
+				#if (flash || notiles)
 				if (sprite.visible && sprite.alpha > 0.0)
 				{
 					var m = sprite.bmp.transform.matrix;
@@ -113,8 +108,8 @@ class TileLayer extends TileGroup
 					m.translate(sprite.x, sprite.y);
 					sprite.bmp.transform.matrix = m;
 					sprite.bmp.blendMode = blend;
-					sprite.bmp.alpha = sprite.alpha;
 					sprite.bmp.visible = true;
+					sprite.bmp.transform.colorTransform = new ColorTransform(sprite.r, sprite.g, sprite.b, sprite.alpha);
 					// TODO apply tint
 				}
 				else sprite.bmp.visible = false;
@@ -123,9 +118,9 @@ class TileLayer extends TileGroup
 				if (sprite.alpha <= 0.0) continue;
 				list[index+2] = sprite.indice;
 
-				if (sprite.offset != null) 
+				if (sprite.offset != null)
 				{
-					var off:Point = sprite.offset;					
+					var off:Point = sprite.offset;
 					if (offsetTransform > 0) {
 						var t = sprite.transform;
 						list[index] = sprite.x - off.x * t[0] - off.y * t[2] + gx;
@@ -197,7 +192,7 @@ class TileBase
 	{
 	}
 
-	#if flash
+	#if (flash || notiles)
 	function getView():DisplayObject { return null; }
 	#end
 }
@@ -240,7 +235,7 @@ class TileBase
 		function begin(elapsed:Int, useTransforms:Bool, useAlpha:Bool, useTint:Bool, useAdditive:Bool) 
 	#end
 	{
-		#if !flash
+		#if !(flash || notiles)
 		flags = 0;
 		fields = 3;
 		if (useTransforms) {

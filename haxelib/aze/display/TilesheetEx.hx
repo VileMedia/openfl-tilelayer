@@ -22,14 +22,15 @@ class TilesheetEx extends Tilesheet
 	public var scale:Float;
 	var defs:Array<String>;
 	var sizes:Array<Rectangle>;
-
+	var rects:Array<Rectangle>;
+	
 	#if haxe3
 		var anims:Map<String,Array<Int>>;
 	#else
 		var anims:Hash<Array<Int>>;
 	#end
 
-	#if flash
+	#if (flash || notiles)
 	var bmps:Array<BitmapData>;
 	#end
 
@@ -48,16 +49,18 @@ class TilesheetEx extends Tilesheet
 		#end
 
 		sizes = new Array<Rectangle>();
-		#if flash
+		rects = new Array<Rectangle>();
+		#if (flash || notiles)
 		bmps = new Array<BitmapData>();
 		#end
 	}
 
-	#if flash
+	#if (flash || notiles)
 	public function addDefinition(name:String, size:Rectangle, bmp:BitmapData)
 	{
 		defs.push(name);
 		sizes.push(size);
+		rects.push(size);
 		bmps.push(bmp);
 	}
 	#else
@@ -65,6 +68,7 @@ class TilesheetEx extends Tilesheet
 	{
 		defs.push(name);
 		sizes.push(size);
+		rects.push(rect);
 		addTileRect(rect, center);
 	}
 	#end
@@ -83,13 +87,19 @@ class TilesheetEx extends Tilesheet
 		return indices;
 	}
 
+	inline public function getRect(indice:Int):Rectangle
+	{
+		if (indice < rects.length) return rects[indice];
+		else return new Rectangle();
+	}
+
 	inline public function getSize(indice:Int):Rectangle
 	{
 		if (indice < sizes.length) return sizes[indice];
 		else return new Rectangle();
 	}
 
-	#if flash
+	#if (flash || notiles)
 	inline public function getBitmap(indice:Int):BitmapData
 	{
 		return bmps[indice];
@@ -130,7 +140,7 @@ class TilesheetEx extends Tilesheet
 		{
 			var image = images[i];
 			img.copyPixels(image, image.rect, pos, null, null, true);
-			#if flash
+			#if (flash || notiles)
 			sheet.addDefinition(names[i], image.rect, image);
 			#else
 			var rect = new Rectangle(padding, pos.y, image.width, image.height);
